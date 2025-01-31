@@ -7,6 +7,7 @@ import { ChevronsLeft, MenuIcon } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 
 import { cn } from "@/lib/utils";
+import { UserItem } from "./user-item";
 
 export function Navigation() {
   const params = useParams();
@@ -117,7 +118,9 @@ export function Navigation() {
         >
           <ChevronsLeft className="w-6 h-6" />
         </div>
-        <div>Action Items</div>
+        <div>
+          <UserItem />
+        </div>
         <div className="mt-4">Documents</div>
         <div
           className="opacity-0 group-hover/sidebar:opacity-100 transition cursor-ew-resize absolute h-full w-1 bg-primary/10

@@ -1,8 +1,7 @@
 "use client";
-
-import React from "react";
-
-import { useParams, usePathname } from "next/navigation";
+import React, { ElementRef, useEffect, useRef, useState } from "react";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
 import {
   ChevronsLeft,
   MenuIcon,
@@ -13,34 +12,39 @@ import {
   Trash,
 } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { UserItem } from "./user-item";
-import { Item } from "./item";
-import { useMutation } from "convex/react";
 import { api } from "@/../convex/_generated/api";
-import { toast } from "sonner";
-import { DocumentList } from "./document-list";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+
+import { Item } from "./item";
+import { DocumentList } from "./document-list";
 import { TrashBox } from "./trash-box";
+import { useSearchStore } from "@/store/use-search-store";
+// import { Navbar } from "./Navbar"
 
 export function Navigation() {
+  const router = useRouter();
+  // const settings = useSettings()
+  const search = useSearchStore();
   const params = useParams();
-  const isMobile = useMediaQuery("(max-width:768px)");
   const pathname = usePathname();
+  const isMobile = useMediaQuery("(max-width:768px)");
   const create = useMutation(api.documents.create);
 
-  const isResizingRef = React.useRef(false);
-  const sidebarRef = React.useRef<React.ElementRef<"aside">>(null);
-  const navbarRef = React.useRef<React.ElementRef<"div">>(null);
-  const [isResetting, setIsResetting] = React.useState(false);
-  const [isCollapsed, setIsCollapsed] = React.useState(isMobile);
+  const isResizingRef = useRef(false);
+  const sidebarRef = useRef<ElementRef<"aside">>(null);
+  const navbarRef = useRef<ElementRef<"div">>(null);
+  const [isResetting, setIsResetting] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(isMobile);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isMobile) {
       collapse();
     } else {
@@ -48,7 +52,7 @@ export function Navigation() {
     }
   }, [isMobile]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isMobile) {
       collapse();
     }
@@ -105,16 +109,6 @@ export function Navigation() {
     }
   };
 
-  const handleCreate = () => {
-    const promise = create({ title: "Untitled" });
-
-    toast.promise(promise, {
-      loading: "Creating new note...",
-      success: "New note created!",
-      error: "Failed to create note.",
-    });
-  };
-
   const collapse = () => {
     if (sidebarRef.current && navbarRef.current) {
       setIsCollapsed(true);
@@ -127,6 +121,18 @@ export function Navigation() {
     }
   };
 
+  const handleCreate = () => {
+    const promise = create({ title: "Untitled" }).then((documentId) =>
+      router.push(`/documents/${documentId}`),
+    );
+
+    toast.promise(promise, {
+      loading: "Creating new note...",
+      success: "New note created!",
+      error: "Failed to create note.",
+    });
+  };
+
   return (
     <>
       <aside
@@ -137,44 +143,55 @@ export function Navigation() {
         )}
         ref={sidebarRef}
       >
-        <div
-          className={cn(
-            `w-6 h-6 text-muted-foreground rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 absolute
-               top-3 right-2 opacity-0 group-hover/sidebar:opacity-100 transition`,
-            isMobile && "opacity-100",
-          )}
-          onClick={collapse}
-          role="button"
-        >
-          <ChevronsLeft className="w-6 h-6" />
-        </div>
         <div>
-          <UserItem />
-          <Item label="Search" icon={Search} isSearch onClick={() => {}} />
-          <Item label="Settings" icon={Settings} onClick={() => {}} />
-          <Item label="New page" icon={PlusCircle} onClick={handleCreate} />
-        </div>
-        <div className="mt-4">
-          <DocumentList />
-          <Item onClick={handleCreate} icon={Plus} label="Add a page" />
-          <Popover>
-            <PopoverTrigger className="w-full mt-4">
-              <Item label="Trash" icon={Trash} />
-            </PopoverTrigger>
-            <PopoverContent
-              className="p-0 w-72 "
-              side={isMobile ? "bottom" : "right"}
-            >
-              <TrashBox />
-            </PopoverContent>
-          </Popover>
-        </div>
-        <div
-          className="opacity-0 group-hover/sidebar:opacity-100 transition cursor-ew-resize absolute h-full w-1 bg-primary/10
+          <div
+            className={cn(
+              `w-6 h-6 text-muted-foreground rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 absolute
+        top-3 right-2 opacity-0 group-hover/sidebar:opacity-100 transition`,
+              isMobile && "opacity-100",
+            )}
+            onClick={collapse}
+            role="button"
+          >
+            <ChevronsLeft className="w-6 h-6" />
+          </div>
+          <div>
+            <UserItem />
+            <Item
+              label="Search"
+              icon={Search}
+              isSearch
+              onClick={search.onOpen}
+            />
+            <Item
+              label="Settings"
+              icon={Settings}
+              //  onClick={settings.onOpen}
+            />
+            <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
+          </div>
+          <div className="mt-4">
+            <DocumentList />
+            <Item onClick={handleCreate} icon={Plus} label="Add a page" />
+            <Popover>
+              <PopoverTrigger className="w-full mt-4">
+                <Item label="Trash" icon={Trash} />
+              </PopoverTrigger>
+              <PopoverContent
+                className="p-0 w-72 "
+                side={isMobile ? "bottom" : "right"}
+              >
+                <TrashBox />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div
+            className="opacity-0 group-hover/sidebar:opacity-100 transition cursor-ew-resize absolute h-full w-1 bg-primary/10
         right-0 top-0"
-          onMouseDown={handleMouseDown}
-          onClick={resetWidth}
-        />
+            onMouseDown={handleMouseDown}
+            onClick={resetWidth}
+          ></div>
+        </div>
       </aside>
       <div
         className={cn(
@@ -185,7 +202,7 @@ export function Navigation() {
         ref={navbarRef}
       >
         {!!params.documentId ? (
-          // <Navbar isCollapsed={isCollapsed} onResetWidth={resetWidth}/>
+          // <Navbar isCollapsed={isCollapsed} onResetWidth={resetWidth} />
           <div></div>
         ) : (
           <nav className="bg-transparent px-3 py-2 w-full">

@@ -28,7 +28,7 @@ import { DocumentList } from "./document-list";
 import { TrashBox } from "./trash-box";
 import { useSearchStore } from "@/store/use-search-store";
 import { useSettingsStore } from "@/store/use-settings-store";
-// import { Navbar } from "./Navbar"
+import { Navbar } from "./navbar";
 
 export function Navigation() {
   const router = useRouter();
@@ -199,8 +199,7 @@ export function Navigation() {
         ref={navbarRef}
       >
         {!!params.documentId ? (
-          // <Navbar isCollapsed={isCollapsed} onResetWidth={resetWidth} />
-          <div></div>
+          <Navbar isCollapsed={isCollapsed} onResetWidth={resetWidth} />
         ) : (
           <nav className="bg-transparent px-3 py-2 w-full">
             {isCollapsed && (

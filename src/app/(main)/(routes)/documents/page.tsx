@@ -1,15 +1,28 @@
 "use client";
 
-import Image from "next/image";
 import { useUser } from "@clerk/clerk-react";
+import { useMutation } from "convex/react";
 import { PlusCircle } from "lucide-react";
+import Image from "next/image";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
+import { api } from "@/../convex/_generated/api";
+
 export default function DocumentsPage() {
   const { user } = useUser();
+  const create = useMutation(api.documents.create);
 
-  const onCreate = () => {};
+  const onCreate = () => {
+    const promise = create({ title: "Untitled" });
+
+    toast.promise(promise, {
+      loading: "Creating a new note...",
+      success: "New note created",
+      error: "Failed to create a new note",
+    });
+  };
 
   return (
     <div className="flex flex-col justify-center items-center h-full space-y-4">

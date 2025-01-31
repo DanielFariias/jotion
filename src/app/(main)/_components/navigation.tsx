@@ -27,11 +27,12 @@ import { Item } from "./item";
 import { DocumentList } from "./document-list";
 import { TrashBox } from "./trash-box";
 import { useSearchStore } from "@/store/use-search-store";
+import { useSettingsStore } from "@/store/use-settings-store";
 // import { Navbar } from "./Navbar"
 
 export function Navigation() {
   const router = useRouter();
-  // const settings = useSettings()
+  const settings = useSettingsStore();
   const search = useSearchStore();
   const params = useParams();
   const pathname = usePathname();
@@ -163,11 +164,7 @@ export function Navigation() {
               isSearch
               onClick={search.onOpen}
             />
-            <Item
-              label="Settings"
-              icon={Settings}
-              //  onClick={settings.onOpen}
-            />
+            <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
             <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
           </div>
           <div className="mt-4">

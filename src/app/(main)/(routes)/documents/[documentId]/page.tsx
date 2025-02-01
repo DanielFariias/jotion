@@ -7,6 +7,8 @@ import { Id } from "@/../convex/_generated/dataModel";
 import { api } from "@/../convex/_generated/api";
 import { Toolbar } from "@/components/toolbar";
 import { Cover } from "@/components/cover";
+import dynamic from "next/dynamic";
+import { useMemo } from "react";
 
 interface DocumentIdPageProps {
   params: {
@@ -15,7 +17,10 @@ interface DocumentIdPageProps {
 }
 
 export default function DocumentIdPage({ params }: DocumentIdPageProps) {
-  // const Editor = useMemo(() => dynamic(() => import("@/components/Editor"),{ssr:false}),[])
+  const Editor = useMemo(
+    () => dynamic(() => import("@/components/editor"), { ssr: false }),
+    [],
+  );
 
   const document = useQuery(api.documents.getById, {
     documentId: params.documentId,
@@ -55,7 +60,7 @@ export default function DocumentIdPage({ params }: DocumentIdPageProps) {
       <Cover url={document.coverImage} />
       <div className="md:max-w-3xl lg:md-max-w-4xl mx-auto">
         <Toolbar initialData={document} />
-        {/* <Editor onChange={onChange} initialContent={document.content} /> */}
+        <Editor onChange={onChange} initialContent={document.content} />
       </div>
     </div>
   );
